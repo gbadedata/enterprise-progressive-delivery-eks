@@ -59,7 +59,25 @@ variable "max_node_count" {
 }
 
 variable "admin_cidr_blocks" {
-  description = "CIDR blocks allowed to reach the EKS public API endpoint. For this demo, restrict to the operator's current public IP."
+  description = "CIDR blocks allowed to reach the EKS public API endpoint. Restricted to operator public IP for local administration. GitHub deployment uses a self-hosted runner inside AWS instead of opening the EKS API publicly."
   type        = list(string)
   default     = ["213.78.142.56/32"]
+}
+
+variable "runner_instance_type" {
+  description = "EC2 instance type for the GitHub Actions self-hosted runner."
+  type        = string
+  default     = "t3.medium"
+}
+
+variable "runner_allowed_ssh_cidr" {
+  description = "CIDR allowed to SSH into the self-hosted runner. Restrict to operator public IP."
+  type        = string
+  default     = "213.78.142.56/32"
+}
+
+variable "runner_key_name" {
+  description = "EC2 key pair name for SSH access to the self-hosted runner."
+  type        = string
+  default     = "epd-eks-runner-key"
 }

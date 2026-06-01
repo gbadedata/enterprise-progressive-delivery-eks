@@ -1,4 +1,4 @@
-name: Deploy to EKS with OIDC
+name: Deploy to EKS with Self-Hosted Runner
 
 on:
   workflow_dispatch:
@@ -9,13 +9,12 @@ on:
         default: "v4.0.0"
 
 permissions:
-  id-token: write
   contents: read
 
 jobs:
   deploy:
-    name: Build, Scan, Push, and Deploy
-    runs-on: ubuntu-latest
+    name: Build, Scan, Push, and Deploy from AWS Runner
+    runs-on: [self-hosted, linux, x64, epd-eks-runner]
 
     env:
       AWS_REGION: us-east-1
@@ -27,12 +26,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Configure AWS credentials using OIDC
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::677276115158:role/epd-eks-dev-github-actions-deploy
-          aws-region: us-east-1
 
       - name: Confirm AWS identity
         run: aws sts get-caller-identity
@@ -50,23 +43,16 @@ jobs:
           echo "ECR repository URL: $ECR_REPO_URL"
 
       - name: Login to ECR
-        uses: aws-actions/amazon-ecr-login@v2
+        run: |
+          aws ecr get-login-password --region "$AWS_REGION" \
+            | docker login --username AWS --password-stdin \
+              "$(aws sts get-caller-identity --query Account --output text).dkr.ecr.$AWS_REGION.amazonaws.com"
 
       - name: Build Docker image
         run: |
           docker build --no-cache \
             -t orders-api:${{ github.event.inputs.image_tag }} \
             ./app
-
-      - name: Install Trivy CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
-          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install -y trivy
-          trivy --version
 
       - name: Run Trivy image scan
         run: |
@@ -90,16 +76,6 @@ jobs:
           aws eks update-kubeconfig \
             --region "$AWS_REGION" \
             --name "$CLUSTER_NAME"
-
-      - name: Install Argo Rollouts kubectl plugin
-        run: |
-          curl -fsSL -o kubectl-argo-rollouts-linux-amd64 \
-            https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
-
-          chmod +x kubectl-argo-rollouts-linux-amd64
-          sudo mv kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
-
-          kubectl argo rollouts version
 
       - name: Patch rollout application version
         run: |

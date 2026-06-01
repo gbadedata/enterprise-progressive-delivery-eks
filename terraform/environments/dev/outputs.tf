@@ -37,3 +37,18 @@ output "public_subnet_ids" {
   description = "Public subnet IDs."
   value       = aws_subnet.public[*].id
 }
+
+output "github_runner_public_ip" {
+  description = "Public IP of the GitHub Actions self-hosted runner."
+  value       = aws_instance.github_runner.public_ip
+}
+
+output "github_runner_instance_id" {
+  description = "EC2 instance ID of the GitHub Actions self-hosted runner."
+  value       = aws_instance.github_runner.id
+}
+
+output "github_runner_role_arn" {
+  description = "IAM role ARN attached to the EC2 self-hosted runner."
+  value       = aws_iam_role.github_runner_ec2.arn
+}
