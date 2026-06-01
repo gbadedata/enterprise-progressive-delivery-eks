@@ -1,0 +1,34 @@
+Name:            orders-api
+Namespace:       app-dev
+Status:          [32m✔[0m Healthy
+Strategy:        Canary
+  Step:          8/8
+  SetWeight:     100
+  ActualWeight:  100
+Images:          677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v2.0.0 ([32mstable[0m)
+Replicas:
+  Desired:       4
+  Current:       4
+  Updated:       4
+  Ready:         4
+  Available:     4
+
+NAME                                    KIND         STATUS        AGE  INFO
+⟳ orders-api                            Rollout      [32m✔[0m Healthy     79m  
+├──# revision:10                                                        
+│  └──⧉ [32morders-api-5fcbddb859[0m           ReplicaSet   [32m✔[0m Healthy     53m  [32mstable[0m
+│     ├──□ orders-api-5fcbddb859-cd966  Pod          [32m✔[0m Running     32m  ready:1/1
+│     ├──□ orders-api-5fcbddb859-4fs7w  Pod          [32m✔[0m Running     31m  ready:1/1
+│     ├──□ orders-api-5fcbddb859-25g5k  Pod          [32m✔[0m Running     29m  ready:1/1
+│     └──□ orders-api-5fcbddb859-brqjv  Pod          [32m✔[0m Running     29m  ready:1/1
+├──# revision:9                                                         
+│  ├──⧉ orders-api-55f98496d8           ReplicaSet   [0m•[0m ScaledDown  16m  delay:passed
+│  ├──α [0morders-api-55f98496d8-9-2[0m       AnalysisRun  [32m✔[0m Successful  14m  [32m✔[0m 2
+│  └──α [0morders-api-55f98496d8-9-5[0m       AnalysisRun  [31m✖[0m Failed      13m  [31m✖[0m 2
+├──# revision:8                                                         
+│  ├──α [0morders-api-5fcbddb859-8-2[0m       AnalysisRun  [32m✔[0m Successful  31m  [32m✔[0m 2
+│  └──α [0morders-api-5fcbddb859-8-5[0m       AnalysisRun  [32m✔[0m Successful  29m  [32m✔[0m 2
+├──# revision:7                                                         
+│  └──⧉ orders-api-9b89ccc78            ReplicaSet   [0m•[0m ScaledDown  79m  
+└──# revision:4                                                         
+   └──⧉ orders-api-786bcf5447           ReplicaSet   [0m•[0m ScaledDown  73m  delay:passed
