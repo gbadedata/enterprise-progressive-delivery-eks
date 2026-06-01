@@ -43,15 +43,24 @@ jobs:
       - name: Build Docker image
         run: docker build --no-cache -t orders-api:ci ./app
 
+      - name: Install Trivy CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+          trivy --version
+
       - name: Run Trivy image scan
-        uses: aquasecurity/trivy-action@v0.33.1
-        with:
-          image-ref: orders-api:ci
-          scan-type: image
-          scanners: vuln
-          severity: HIGH,CRITICAL
-          exit-code: "1"
-          format: table
+        run: |
+          trivy image \
+            --scanners vuln \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            --format table \
+            orders-api:ci
 
   infrastructure-ci:
     name: Terraform, Kubernetes, and IaC Security Checks
@@ -76,10 +85,11 @@ jobs:
         run: terraform -chdir=terraform/environments/dev validate
 
       - name: Install kubeconform
-        run: curl -L -o kubeconform.tar.gz \
-            https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
-          tar -xzf kubeconform.tar.gz
-          sudo mv kubeconform /usr/local/bin/kubeconform
+        run: |
+          curl -fsSL -o /tmp/kubeconform.tar.gz "https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz"
+          tar -xzf /tmp/kubeconform.tar.gz -C /tmp
+          sudo mv /tmp/kubeconform /usr/local/bin/kubeconform
+          kubeconform -v
 
       - name: Validate Kubernetes base manifests
         run: kubeconform -strict -summary k8s/base/*.yaml
