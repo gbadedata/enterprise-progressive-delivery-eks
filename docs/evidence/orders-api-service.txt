@@ -1,0 +1,2 @@
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE    SELECTOR
+orders-api   ClusterIP   172.20.236.248   <none>        80/TCP    5m5s   app=orders-api
