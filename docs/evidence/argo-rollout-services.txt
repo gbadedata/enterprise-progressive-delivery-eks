@@ -1,0 +1,3 @@
+NAME                TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+orders-api-canary   ClusterIP   172.20.124.218   <none>        80/TCP    89s   app=orders-api,rollouts-pod-template-hash=9b89ccc78
+orders-api-stable   ClusterIP   172.20.191.207   <none>        80/TCP    91s   app=orders-api,rollouts-pod-template-hash=9b89ccc78

@@ -1,0 +1,96 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: orders-api
+  namespace: app-dev
+  labels:
+    app: orders-api
+spec:
+  replicas: 4
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: orders-api
+  strategy:
+    canary:
+      stableService: orders-api-stable
+      canaryService: orders-api-canary
+      trafficRouting:
+        nginx:
+          stableIngress: orders-api
+      steps:
+        - setWeight: 10
+        - pause:
+            duration: 60s
+        - analysis:
+            templates:
+              - templateName: orders-api-success-rate
+        - setWeight: 50
+        - pause:
+            duration: 60s
+        - analysis:
+            templates:
+              - templateName: orders-api-success-rate
+        - setWeight: 100
+        - pause:
+            duration: 30s
+  template:
+    metadata:
+      labels:
+        app: orders-api
+        version: v1
+    spec:
+      serviceAccountName: orders-api
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 100
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: orders-api
+          image: 677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v1.0.0
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: APP_VERSION
+              value: "v1.0.0"
+            - name: DEPLOYMENT_COLOR
+              value: "blue"
+            - name: FAIL_MODE
+              value: "none"
+            - name: PORT
+              value: "3000"
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            capabilities:
+              drop:
+                - ALL

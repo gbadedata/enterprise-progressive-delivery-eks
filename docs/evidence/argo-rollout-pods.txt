@@ -1,0 +1,5 @@
+NAME                         READY   STATUS    RESTARTS   AGE   IP             NODE                          NOMINATED NODE   READINESS GATES
+orders-api-9b89ccc78-5czn6   1/1     Running   0          79s   10.40.10.82    ip-10-40-10-43.ec2.internal   <none>           <none>
+orders-api-9b89ccc78-76ggt   1/1     Running   0          79s   10.40.11.23    ip-10-40-11-51.ec2.internal   <none>           <none>
+orders-api-9b89ccc78-jdr87   1/1     Running   0          79s   10.40.10.126   ip-10-40-10-43.ec2.internal   <none>           <none>
+orders-api-9b89ccc78-llsgc   1/1     Running   0          79s   10.40.11.116   ip-10-40-11-51.ec2.internal   <none>           <none>

@@ -1,0 +1,3 @@
+NAME                           CLASS   HOSTS   ADDRESS                                                                   PORTS   AGE
+orders-api                     nginx   *       ad5fe725d2d39434b8cea8cbb83f0328-1382625397.us-east-1.elb.amazonaws.com   80      84s
+orders-api-orders-api-canary   nginx   *       ad5fe725d2d39434b8cea8cbb83f0328-1382625397.us-east-1.elb.amazonaws.com   80      72s

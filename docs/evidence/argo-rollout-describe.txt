@@ -1,0 +1,163 @@
+Name:         orders-api
+Namespace:    app-dev
+Labels:       app=orders-api
+Annotations:  rollout.argoproj.io/revision: 1
+API Version:  argoproj.io/v1alpha1
+Kind:         Rollout
+Metadata:
+  Creation Timestamp:  2026-06-01T17:56:04Z
+  Generation:          1
+  Resource Version:    7756
+  UID:                 7276fc06-1637-47de-b990-d720d9f5cdc0
+Spec:
+  Replicas:                4
+  Revision History Limit:  3
+  Selector:
+    Match Labels:
+      App:  orders-api
+  Strategy:
+    Canary:
+      Canary Service:  orders-api-canary
+      Stable Service:  orders-api-stable
+      Steps:
+        Set Weight:  10
+        Pause:
+          Duration:  60s
+        Analysis:
+          Templates:
+            Template Name:  orders-api-success-rate
+        Set Weight:         50
+        Pause:
+          Duration:  60s
+        Analysis:
+          Templates:
+            Template Name:  orders-api-success-rate
+        Set Weight:         100
+        Pause:
+          Duration:  30s
+      Traffic Routing:
+        Nginx:
+          Stable Ingress:  orders-api
+  Template:
+    Metadata:
+      Labels:
+        App:      orders-api
+        Version:  v1
+    Spec:
+      Automount Service Account Token:  false
+      Containers:
+        Env:
+          Name:             APP_VERSION
+          Value:            v1.0.0
+          Name:             DEPLOYMENT_COLOR
+          Value:            blue
+          Name:             FAIL_MODE
+          Value:            none
+          Name:             PORT
+          Value:            3000
+        Image:              677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v1.0.0
+        Image Pull Policy:  Always
+        Liveness Probe:
+          Failure Threshold:  3
+          Http Get:
+            Path:                 /live
+            Port:                 3000
+          Initial Delay Seconds:  10
+          Period Seconds:         20
+          Timeout Seconds:        3
+        Name:                     orders-api
+        Ports:
+          Container Port:  3000
+          Name:            http
+          Protocol:        TCP
+        Readiness Probe:
+          Failure Threshold:  3
+          Http Get:
+            Path:                 /ready
+            Port:                 3000
+          Initial Delay Seconds:  5
+          Period Seconds:         10
+          Timeout Seconds:        3
+        Resources:
+          Limits:
+            Cpu:     500m
+            Memory:  256Mi
+          Requests:
+            Cpu:     100m
+            Memory:  128Mi
+        Security Context:
+          Allow Privilege Escalation:  false
+          Capabilities:
+            Drop:
+              ALL
+          Read Only Root Filesystem:  false
+      Security Context:
+        Fs Group:         101
+        Run As Group:     101
+        Run As Non Root:  true
+        Run As User:      100
+        Seccomp Profile:
+          Type:              RuntimeDefault
+      Service Account Name:  orders-api
+Status:
+  HPA Replicas:        4
+  Available Replicas:  4
+  Blue Green:
+  Canary:
+    Weights:
+      Canary:
+        Pod Template Hash:  9b89ccc78
+        Service Name:       orders-api-canary
+        Weight:             0
+      Stable:
+        Pod Template Hash:  9b89ccc78
+        Service Name:       orders-api-stable
+        Weight:             100
+  Conditions:
+    Last Transition Time:  2026-06-01T17:56:04Z
+    Last Update Time:      2026-06-01T17:56:04Z
+    Message:               RolloutCompleted
+    Reason:                RolloutCompleted
+    Status:                True
+    Type:                  Completed
+    Last Transition Time:  2026-06-01T17:56:14Z
+    Last Update Time:      2026-06-01T17:56:14Z
+    Message:               Rollout is healthy
+    Reason:                RolloutHealthy
+    Status:                True
+    Type:                  Healthy
+    Last Transition Time:  2026-06-01T17:56:04Z
+    Last Update Time:      2026-06-01T17:56:14Z
+    Message:               ReplicaSet "orders-api-9b89ccc78" has successfully progressed.
+    Reason:                NewReplicaSetAvailable
+    Status:                True
+    Type:                  Progressing
+    Last Transition Time:  2026-06-01T17:56:14Z
+    Last Update Time:      2026-06-01T17:56:14Z
+    Message:               Rollout has minimum availability
+    Reason:                AvailableReason
+    Status:                True
+    Type:                  Available
+  Current Pod Hash:        9b89ccc78
+  Current Step Hash:       59b4cc8d9d
+  Current Step Index:      8
+  Observed Generation:     1
+  Phase:                   Healthy
+  Ready Replicas:          4
+  Replicas:                4
+  Selector:                app=orders-api
+  Stable RS:               9b89ccc78
+  Updated Replicas:        4
+Events:
+  Type    Reason                  Age   From                 Message
+  ----    ------                  ----  ----                 -------
+  Normal  RolloutAddedToInformer  76s   rollouts-controller  Rollout resource added to informer: app-dev/orders-api
+  Normal  RolloutUpdated          76s   rollouts-controller  Rollout updated to revision 1
+  Normal  NewReplicaSetCreated    76s   rollouts-controller  Created ReplicaSet orders-api-9b89ccc78 (revision 1)
+  Normal  RolloutNotCompleted     76s   rollouts-controller  Rollout not completed, started update to revision 1 (9b89ccc78)
+  Normal  ScalingReplicaSet       76s   rollouts-controller  Scaled up ReplicaSet orders-api-9b89ccc78 (revision 1) from 0 to 4
+  Normal  RolloutCompleted        76s   rollouts-controller  Rollout completed update to revision 1 (9b89ccc78): Initial deploy
+  Normal  SwitchService           66s   rollouts-controller  Switched selector for service 'orders-api-stable' from '' to '9b89ccc78'
+  Normal  SwitchService           66s   rollouts-controller  Switched selector for service 'orders-api-canary' from '' to '9b89ccc78'
+  Normal  CreatingCanaryIngress   66s   rollouts-controller  Creating canary ingress `orders-api-orders-api-canary` with weight `0`
+  Normal  TrafficWeightUpdated    66s   rollouts-controller  Traffic weight updated to 0
