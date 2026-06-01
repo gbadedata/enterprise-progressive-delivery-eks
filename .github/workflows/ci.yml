@@ -1,0 +1,103 @@
+name: CI Quality and Security Gate
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  app-ci:
+    name: App Test, Audit, Docker Build, Trivy Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: app/package-lock.json
+
+      - name: Install dependencies
+        working-directory: app
+        run: npm ci
+
+      - name: Run tests
+        working-directory: app
+        run: npm test
+
+      - name: Run syntax check
+        working-directory: app
+        run: npm run lint
+
+      - name: Run npm audit
+        working-directory: app
+        run: npm audit --audit-level=moderate
+
+      - name: Build Docker image
+        run: docker build --no-cache -t orders-api:ci ./app
+
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: orders-api:ci
+          scan-type: image
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          format: table
+
+  infrastructure-ci:
+    name: Terraform, Kubernetes, and IaC Security Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10.5"
+
+      - name: Terraform fmt check
+        run: terraform -chdir=terraform/environments/dev fmt -check
+
+      - name: Terraform init without backend
+        run: terraform -chdir=terraform/environments/dev init -backend=false
+
+      - name: Terraform validate
+        run: terraform -chdir=terraform/environments/dev validate
+
+      - name: Install kubeconform
+        run: |
+          curl -L -o kubeconform.tar.gz \
+            https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -xzf kubeconform.tar.gz
+          sudo mv kubeconform /usr/local/bin/kubeconform
+
+      - name: Validate Kubernetes base manifests
+        run: kubeconform -strict -summary k8s/base/*.yaml
+
+      - name: Validate Kubernetes rollout manifests except Argo CRDs
+        run: |
+          kubeconform -strict -summary \
+            k8s/rollouts/namespace.yaml \
+            k8s/rollouts/serviceaccount.yaml \
+            k8s/rollouts/service-stable.yaml \
+            k8s/rollouts/service-canary.yaml \
+            k8s/rollouts/ingress.yaml \
+            k8s/rollouts/networkpolicy.yaml \
+            k8s/rollouts/servicemonitor.yaml
+
+      - name: Run Checkov Terraform scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: terraform/environments/dev
+          quiet: true
