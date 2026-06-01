@@ -1,0 +1,29 @@
+Name:            orders-api
+Namespace:       app-dev
+Status:          [32m✔[0m Healthy
+Strategy:        Canary
+  Step:          8/8
+  SetWeight:     100
+  ActualWeight:  100
+Images:          677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v2.0.0 ([32mstable[0m)
+Replicas:
+  Desired:       4
+  Current:       4
+  Updated:       4
+  Ready:         4
+  Available:     4
+
+NAME                                    KIND         STATUS        AGE    INFO
+⟳ orders-api                            Rollout      [32m✔[0m Healthy     56m    
+├──# revision:8                                                           
+│  ├──⧉ [32morders-api-5fcbddb859[0m           ReplicaSet   [32m✔[0m Healthy     30m    [32mstable[0m
+│  │  ├──□ orders-api-5fcbddb859-cd966  Pod          [32m✔[0m Running     9m38s  ready:1/1
+│  │  ├──□ orders-api-5fcbddb859-4fs7w  Pod          [32m✔[0m Running     7m58s  ready:1/1
+│  │  ├──□ orders-api-5fcbddb859-25g5k  Pod          [32m✔[0m Running     6m18s  ready:1/1
+│  │  └──□ orders-api-5fcbddb859-brqjv  Pod          [32m✔[0m Running     6m18s  ready:1/1
+│  ├──α [0morders-api-5fcbddb859-8-2[0m       AnalysisRun  [32m✔[0m Successful  8m28s  [32m✔[0m 2
+│  └──α [0morders-api-5fcbddb859-8-5[0m       AnalysisRun  [32m✔[0m Successful  6m48s  [32m✔[0m 2
+├──# revision:7                                                           
+│  └──⧉ orders-api-9b89ccc78            ReplicaSet   [0m•[0m ScaledDown  56m    
+└──# revision:4                                                           
+   └──⧉ orders-api-786bcf5447           ReplicaSet   [0m•[0m ScaledDown  49m    delay:passed
