@@ -1,0 +1,4 @@
+AWS_REGION=us-east-1
+ACCOUNT_ID=677276115158
+TF_STATE_BUCKET=epd-eks-tfstate-677276115158-us-east-1
+TF_LOCK_TABLE=epd-eks-tf-locks
