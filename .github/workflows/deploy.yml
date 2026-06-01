@@ -22,6 +22,7 @@ jobs:
       CLUSTER_NAME: epd-eks-dev
       APP_NAMESPACE: app-dev
       APP_NAME: orders-api
+      ECR_REPOSITORY_NAME: epd-eks-dev-orders-api
 
     steps:
       - name: Checkout repository
@@ -40,11 +41,13 @@ jobs:
         id: ecr
         run: |
           ECR_REPO_URL="$(aws ecr describe-repositories \
-            --repository-names epd-eks-dev-orders-api \
+            --repository-names "$ECR_REPOSITORY_NAME" \
             --region "$AWS_REGION" \
             --query 'repositories[0].repositoryUri' \
             --output text)"
+
           echo "repo_url=$ECR_REPO_URL" >> "$GITHUB_OUTPUT"
+          echo "ECR repository URL: $ECR_REPO_URL"
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
@@ -55,15 +58,24 @@ jobs:
             -t orders-api:${{ github.event.inputs.image_tag }} \
             ./app
 
+      - name: Install Trivy CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+          trivy --version
+
       - name: Run Trivy image scan
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          image-ref: orders-api:${{ github.event.inputs.image_tag }}
-          scan-type: image
-          scanners: vuln
-          severity: HIGH,CRITICAL
-          exit-code: "1"
-          format: table
+        run: |
+          trivy image \
+            --scanners vuln \
+            --severity HIGH,CRITICAL \
+            --exit-code 1 \
+            --format table \
+            orders-api:${{ github.event.inputs.image_tag }}
 
       - name: Tag and push image to ECR
         run: |
@@ -81,9 +93,36 @@ jobs:
 
       - name: Install Argo Rollouts kubectl plugin
         run: |
-          curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+          curl -fsSL -o kubectl-argo-rollouts-linux-amd64 \
+            https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+
           chmod +x kubectl-argo-rollouts-linux-amd64
           sudo mv kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
+
+          kubectl argo rollouts version
+
+      - name: Patch rollout application version
+        run: |
+          kubectl patch rollout "$APP_NAME" \
+            -n "$APP_NAMESPACE" \
+            --type='json' \
+            -p="[
+              {
+                \"op\": \"replace\",
+                \"path\": \"/spec/template/spec/containers/0/env/0/value\",
+                \"value\": \"${{ github.event.inputs.image_tag }}\"
+              },
+              {
+                \"op\": \"replace\",
+                \"path\": \"/spec/template/spec/containers/0/env/1/value\",
+                \"value\": \"blue\"
+              },
+              {
+                \"op\": \"replace\",
+                \"path\": \"/spec/template/spec/containers/0/env/2/value\",
+                \"value\": \"none\"
+              }
+            ]"
 
       - name: Deploy image through Argo Rollouts
         run: |
@@ -102,3 +141,4 @@ jobs:
         run: |
           kubectl argo rollouts get rollout "$APP_NAME" -n "$APP_NAMESPACE"
           kubectl get pods -n "$APP_NAMESPACE" -o wide
+          kubectl get analysisrun -n "$APP_NAMESPACE" -o wide || true
