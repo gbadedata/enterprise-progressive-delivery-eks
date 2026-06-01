@@ -266,21 +266,6 @@ resource "aws_kms_key" "ecr" {
         }
         Action   = "kms:*"
         Resource = "*"
-      },
-      {
-        Sid    = "AllowECRUse"
-        Effect = "Allow"
-        Principal = {
-          Service = "ecr.${var.aws_region}.amazonaws.com"
-        }
-        Action = [
-          "kms:Encrypt",
-          "kms:Decrypt",
-          "kms:ReEncrypt*",
-          "kms:GenerateDataKey*",
-          "kms:DescribeKey"
-        ]
-        Resource = "*"
       }
     ]
   })
@@ -310,22 +295,6 @@ resource "aws_kms_key" "eks_secrets" {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
         }
         Action   = "kms:*"
-        Resource = "*"
-      },
-      {
-        Sid    = "AllowEKSUse"
-        Effect = "Allow"
-        Principal = {
-          Service = "eks.${var.aws_region}.amazonaws.com"
-        }
-        Action = [
-          "kms:Encrypt",
-          "kms:Decrypt",
-          "kms:ReEncrypt*",
-          "kms:GenerateDataKey*",
-          "kms:DescribeKey",
-          "kms:CreateGrant"
-        ]
         Resource = "*"
       }
     ]
