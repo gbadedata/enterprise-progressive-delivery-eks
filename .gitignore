@@ -17,3 +17,12 @@ override.tf.json
 # OS/editor
 .vscode/
 .idea/
+
+# Terraform generated files
+**/tfplan
+**/*.tfplan
+**/*.bak
+**/.terraform/
+
+# Checkov generated folders
+docs/evidence/checkov-dev.txt/

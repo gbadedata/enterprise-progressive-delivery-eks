@@ -1,0 +1,19 @@
+aws_region = "us-east-1"
+cluster_endpoint = "https://B440DF0015EB4E1F84E28F397FAF3543.gr7.us-east-1.eks.amazonaws.com"
+cluster_name = "epd-eks-dev"
+ecr_repository_url = "677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api"
+github_actions_role_arn = "arn:aws:iam::677276115158:role/epd-eks-dev-github-actions-deploy"
+private_subnet_ids = [
+  "subnet-07193e73f2aa1ed7f",
+  "subnet-06840b3a48d3ca781",
+]
+public_subnet_ids = [
+  "subnet-05d0e090149a1f8b5",
+  "subnet-0a0f44632f614144e",
+]
+vpc_id = "vpc-006be2efe486edfd2"
+[33m╷[0m[0m
+[33m│[0m [0m[1m[33mWarning: [0m[0m[1mDeprecated Parameter[0m
+[33m│[0m [0m
+[33m│[0m [0m[0mThe parameter "dynamodb_table" is deprecated. Use parameter "use_lockfile" instead.
+[33m╵[0m[0m
