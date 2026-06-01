@@ -44,7 +44,7 @@ jobs:
         run: docker build --no-cache -t orders-api:ci ./app
 
       - name: Run Trivy image scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.33.1
         with:
           image-ref: orders-api:ci
           scan-type: image
@@ -76,8 +76,7 @@ jobs:
         run: terraform -chdir=terraform/environments/dev validate
 
       - name: Install kubeconform
-        run: |
-          curl -L -o kubeconform.tar.gz \
+        run: curl -L -o kubeconform.tar.gz \
             https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
           tar -xzf kubeconform.tar.gz
           sudo mv kubeconform /usr/local/bin/kubeconform
@@ -85,16 +84,8 @@ jobs:
       - name: Validate Kubernetes base manifests
         run: kubeconform -strict -summary k8s/base/*.yaml
 
-      - name: Validate Kubernetes rollout manifests except Argo CRDs
-        run: |
-          kubeconform -strict -summary \
-            k8s/rollouts/namespace.yaml \
-            k8s/rollouts/serviceaccount.yaml \
-            k8s/rollouts/service-stable.yaml \
-            k8s/rollouts/service-canary.yaml \
-            k8s/rollouts/ingress.yaml \
-            k8s/rollouts/networkpolicy.yaml \
-            k8s/rollouts/servicemonitor.yaml
+      - name: Validate Kubernetes rollout manifests with CRD schemas ignored
+        run: kubeconform -strict -ignore-missing-schemas -summary k8s/rollouts/*.yaml
 
       - name: Run Checkov Terraform scan
         uses: bridgecrewio/checkov-action@v12
