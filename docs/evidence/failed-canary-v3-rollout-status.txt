@@ -1,0 +1,34 @@
+Name:            orders-api
+Namespace:       app-dev
+Status:          [31m✖[0m Degraded
+Message:         RolloutAborted: Rollout aborted update to revision 9: Step-based analysis phase error/failed: Metric "success-rate" assessed Failed due to failed (2) > failureLimit (1)
+Strategy:        Canary
+  Step:          0/8
+  SetWeight:     0
+  ActualWeight:  0
+Images:          677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v2.0.0 ([32mstable[0m)
+Replicas:
+  Desired:       4
+  Current:       4
+  Updated:       0
+  Ready:         4
+  Available:     4
+
+NAME                                    KIND         STATUS        AGE    INFO
+⟳ orders-api                            Rollout      [31m✖[0m Degraded    75m    
+├──# revision:9                                                           
+│  ├──⧉ [33morders-api-55f98496d8[0m           ReplicaSet   [0m•[0m ScaledDown  12m    [33mcanary[0m,delay:passed
+│  ├──α [0morders-api-55f98496d8-9-2[0m       AnalysisRun  [32m✔[0m Successful  11m    [32m✔[0m 2
+│  └──α [0morders-api-55f98496d8-9-5[0m       AnalysisRun  [31m✖[0m Failed      9m46s  [31m✖[0m 2
+├──# revision:8                                                           
+│  ├──⧉ [32morders-api-5fcbddb859[0m           ReplicaSet   [32m✔[0m Healthy     49m    [32mstable[0m
+│  │  ├──□ orders-api-5fcbddb859-cd966  Pod          [32m✔[0m Running     29m    ready:1/1
+│  │  ├──□ orders-api-5fcbddb859-4fs7w  Pod          [32m✔[0m Running     27m    ready:1/1
+│  │  ├──□ orders-api-5fcbddb859-25g5k  Pod          [32m✔[0m Running     25m    ready:1/1
+│  │  └──□ orders-api-5fcbddb859-brqjv  Pod          [32m✔[0m Running     25m    ready:1/1
+│  ├──α [0morders-api-5fcbddb859-8-2[0m       AnalysisRun  [32m✔[0m Successful  28m    [32m✔[0m 2
+│  └──α [0morders-api-5fcbddb859-8-5[0m       AnalysisRun  [32m✔[0m Successful  26m    [32m✔[0m 2
+├──# revision:7                                                           
+│  └──⧉ orders-api-9b89ccc78            ReplicaSet   [0m•[0m ScaledDown  75m    
+└──# revision:4                                                           
+   └──⧉ orders-api-786bcf5447           ReplicaSet   [0m•[0m ScaledDown  69m    delay:passed

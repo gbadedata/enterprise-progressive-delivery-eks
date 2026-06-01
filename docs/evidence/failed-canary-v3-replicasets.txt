@@ -1,0 +1,5 @@
+NAME                    DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES                                                                       SELECTOR
+orders-api-55f98496d8   0         0         0       12m   orders-api   677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v3.0.0   app=orders-api,rollouts-pod-template-hash=55f98496d8
+orders-api-5fcbddb859   4         4         4       50m   orders-api   677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v2.0.0   app=orders-api,rollouts-pod-template-hash=5fcbddb859
+orders-api-786bcf5447   0         0         0       69m   orders-api   677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v2.0.0   app=orders-api,rollouts-pod-template-hash=786bcf5447
+orders-api-9b89ccc78    0         0         0       75m   orders-api   677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v1.0.0   app=orders-api,rollouts-pod-template-hash=9b89ccc78

@@ -1,0 +1,5 @@
+NAME                        STATUS       AGE
+orders-api-55f98496d8-9-2   Successful   11m
+orders-api-55f98496d8-9-5   Failed       9m51s
+orders-api-5fcbddb859-8-2   Successful   28m
+orders-api-5fcbddb859-8-5   Successful   26m

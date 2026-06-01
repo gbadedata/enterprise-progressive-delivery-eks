@@ -1,0 +1,188 @@
+Name:         orders-api
+Namespace:    app-dev
+Labels:       app=orders-api
+Annotations:  rollout.argoproj.io/revision: 9
+API Version:  argoproj.io/v1alpha1
+Kind:         Rollout
+Metadata:
+  Creation Timestamp:  2026-06-01T17:56:04Z
+  Generation:          10
+  Resource Version:    27739
+  UID:                 7276fc06-1637-47de-b990-d720d9f5cdc0
+Spec:
+  Replicas:                4
+  Revision History Limit:  5
+  Selector:
+    Match Labels:
+      App:  orders-api
+  Strategy:
+    Canary:
+      Canary Service:  orders-api-canary
+      Stable Service:  orders-api-stable
+      Steps:
+        Set Weight:  10
+        Pause:
+          Duration:  60s
+        Analysis:
+          Templates:
+            Template Name:  orders-api-success-rate
+        Set Weight:         50
+        Pause:
+          Duration:  60s
+        Analysis:
+          Templates:
+            Template Name:  orders-api-success-rate
+        Set Weight:         100
+        Pause:
+          Duration:  30s
+      Traffic Routing:
+        Nginx:
+          Stable Ingress:  orders-api
+  Template:
+    Metadata:
+      Labels:
+        App:      orders-api
+        Version:  v3
+    Spec:
+      Automount Service Account Token:  false
+      Containers:
+        Env:
+          Name:             APP_VERSION
+          Value:            v3.0.0
+          Name:             DEPLOYMENT_COLOR
+          Value:            green
+          Name:             FAIL_MODE
+          Value:            error
+          Name:             PORT
+          Value:            3000
+        Image:              677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v3.0.0
+        Image Pull Policy:  Always
+        Liveness Probe:
+          Failure Threshold:  3
+          Http Get:
+            Path:                 /live
+            Port:                 3000
+          Initial Delay Seconds:  10
+          Period Seconds:         20
+          Timeout Seconds:        3
+        Name:                     orders-api
+        Ports:
+          Container Port:  3000
+          Name:            http
+          Protocol:        TCP
+        Readiness Probe:
+          Failure Threshold:  3
+          Http Get:
+            Path:                 /ready
+            Port:                 3000
+          Initial Delay Seconds:  5
+          Period Seconds:         10
+          Timeout Seconds:        3
+        Resources:
+          Limits:
+            Cpu:     500m
+            Memory:  256Mi
+          Requests:
+            Cpu:     100m
+            Memory:  128Mi
+        Security Context:
+          Allow Privilege Escalation:  false
+          Capabilities:
+            Drop:
+              ALL
+          Read Only Root Filesystem:  false
+      Dns Policy:                     ClusterFirst
+      Restart Policy:                 Always
+      Scheduler Name:                 default-scheduler
+      Security Context:
+        Fs Group:         101
+        Run As Group:     101
+        Run As Non Root:  true
+        Run As User:      100
+        Seccomp Profile:
+          Type:                          RuntimeDefault
+      Service Account:                   orders-api
+      Service Account Name:              orders-api
+      Termination Grace Period Seconds:  30
+Status:
+  HPA Replicas:        4
+  Abort:               true
+  Aborted At:          2026-06-01T19:02:38Z
+  Available Replicas:  4
+  Blue Green:
+  Canary:
+    Current Step Analysis Run Status:
+      Message:  Metric "success-rate" assessed Failed due to failed (2) > failureLimit (1)
+      Name:     orders-api-55f98496d8-9-5
+      Status:   Failed
+    Weights:
+      Canary:
+        Pod Template Hash:  55f98496d8
+        Service Name:       orders-api-canary
+        Weight:             0
+      Stable:
+        Pod Template Hash:  5fcbddb859
+        Service Name:       orders-api-stable
+        Weight:             100
+  Conditions:
+    Last Transition Time:  2026-06-01T17:56:14Z
+    Last Update Time:      2026-06-01T17:56:14Z
+    Message:               Rollout has minimum availability
+    Reason:                AvailableReason
+    Status:                True
+    Type:                  Available
+    Last Transition Time:  2026-06-01T18:59:17Z
+    Last Update Time:      2026-06-01T18:59:17Z
+    Message:               Rollout is not healthy
+    Reason:                RolloutHealthy
+    Status:                False
+    Type:                  Healthy
+    Last Transition Time:  2026-06-01T18:59:17Z
+    Last Update Time:      2026-06-01T18:59:17Z
+    Message:               RolloutCompleted
+    Reason:                RolloutCompleted
+    Status:                False
+    Type:                  Completed
+    Last Transition Time:  2026-06-01T19:02:08Z
+    Last Update Time:      2026-06-01T19:02:08Z
+    Message:               Rollout is paused
+    Reason:                RolloutPaused
+    Status:                False
+    Type:                  Paused
+    Last Transition Time:  2026-06-01T19:02:38Z
+    Last Update Time:      2026-06-01T19:02:38Z
+    Message:               Rollout aborted update to revision 9: Step-based analysis phase error/failed: Metric "success-rate" assessed Failed due to failed (2) > failureLimit (1)
+    Reason:                RolloutAborted
+    Status:                False
+    Type:                  Progressing
+  Current Pod Hash:        55f98496d8
+  Current Step Hash:       59b4cc8d9d
+  Current Step Index:      0
+  Message:                 RolloutAborted: Rollout aborted update to revision 9: Step-based analysis phase error/failed: Metric "success-rate" assessed Failed due to failed (2) > failureLimit (1)
+  Observed Generation:     10
+  Phase:                   Degraded
+  Ready Replicas:          4
+  Replicas:                4
+  Selector:                app=orders-api
+  Stable RS:               5fcbddb859
+Events:
+  Type     Reason                 Age                From                 Message
+  ----     ------                 ----               ----                 -------
+  Normal   RolloutUpdated         60m                rollouts-controller  Rollout updated to revision 3
+  Normal   SkipSteps              60m                rollouts-controller  Rollback to stable ReplicaSets
+  Warning  AnalysisRunError       58m                rollouts-controller  Step Analysis Run 'orders-api-786bcf5447-4-2' Status New: 'Error' Previous: 'Running'
+  Warning  RolloutAborted         58m                rollouts-controller  Rollout aborted update to revision 4: Step-based analysis phase error/failed: Metric "success-rate" assessed Error due to consecutiveErrors (5) > consecutiveErrorLimit (4): "Error Message: reflect: slice index out of range"
+  Normal   RolloutUpdated         54m                rollouts-controller  Rollout updated to revision 5
+  Normal   RolloutUpdated         49m                rollouts-controller  Rollout updated to revision 6
+  Warning  RolloutAborted         48m                rollouts-controller  Rollout aborted update to revision 6: Step-based analysis phase error/failed: Metric "success-rate" assessed Error due to consecutiveErrors (5) > consecutiveErrorLimit (4): "Error Message: reflect: slice index out of range"
+  Warning  AnalysisRunError       48m                rollouts-controller  Step Analysis Run 'orders-api-5fcbddb859-6-2' Status New: 'Error' Previous: 'Running'
+  Normal   RolloutUpdated         43m                rollouts-controller  Rollout updated to revision 7
+  Normal   TrafficWeightUpdated   29m (x8 over 69m)  rollouts-controller  Traffic weight updated
+  Normal   RolloutUpdated         29m                rollouts-controller  Rollout updated to revision 8
+  Normal   RolloutNotCompleted    29m                rollouts-controller  Rollout not completed, started update to revision 8 (5fcbddb859)
+  Normal   PatchingCanaryIngress  25m                rollouts-controller  Updating Ingress `orders-api-orders-api-canary` to desiredWeight '100'
+  Normal   RolloutUpdated         12m                rollouts-controller  Rollout updated to revision 9
+  Normal   NewReplicaSetCreated   12m                rollouts-controller  Created ReplicaSet orders-api-55f98496d8 (revision 9)
+  Normal   PatchingCanaryIngress  10m (x2 over 27m)  rollouts-controller  Updating Ingress `orders-api-orders-api-canary` to desiredWeight '50'
+  Warning  AnalysisRunFailed      9m18s              rollouts-controller  Step Analysis Run 'orders-api-55f98496d8-9-5' Status New: 'Failed' Previous: 'Running'
+  Warning  RolloutAborted         9m18s              rollouts-controller  Rollout aborted update to revision 9: Step-based analysis phase error/failed: Metric "success-rate" assessed Failed due to failed (2) > failureLimit (1)
