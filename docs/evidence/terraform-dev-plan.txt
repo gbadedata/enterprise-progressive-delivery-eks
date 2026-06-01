@@ -1,0 +1,1164 @@
+
+Terraform used the selected providers to generate the following execution
+plan. Resource actions are indicated with the following symbols:
+  + create
+ <= read (data resources)
+
+Terraform will perform the following actions:
+
+  # data.aws_iam_policy_document.github_actions_assume_role will be read during apply
+  # (config refers to values not yet known)
+ <= data "aws_iam_policy_document" "github_actions_assume_role" {
+      + id            = (known after apply)
+      + json          = (known after apply)
+      + minified_json = (known after apply)
+
+      + statement {
+          + actions = [
+              + "sts:AssumeRoleWithWebIdentity",
+            ]
+          + effect  = "Allow"
+
+          + condition {
+              + test     = "StringEquals"
+              + values   = [
+                  + "sts.amazonaws.com",
+                ]
+              + variable = "token.actions.githubusercontent.com:aud"
+            }
+          + condition {
+              + test     = "StringLike"
+              + values   = [
+                  + "repo:gbadedata/enterprise-progressive-delivery-eks:ref:refs/heads/main",
+                  + "repo:gbadedata/enterprise-progressive-delivery-eks:pull_request",
+                ]
+              + variable = "token.actions.githubusercontent.com:sub"
+            }
+
+          + principals {
+              + identifiers = [
+                  + (known after apply),
+                ]
+              + type        = "Federated"
+            }
+        }
+    }
+
+  # aws_cloudwatch_log_group.vpc_flow_logs will be created
+  + resource "aws_cloudwatch_log_group" "vpc_flow_logs" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + kms_key_id        = (known after apply)
+      + log_group_class   = (known after apply)
+      + name              = "/aws/vpc/epd-eks-dev/flow-logs"
+      + name_prefix       = (known after apply)
+      + retention_in_days = 365
+      + skip_destroy      = false
+      + tags              = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all          = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+    }
+
+  # aws_default_security_group.main will be created
+  + resource "aws_default_security_group" "main" {
+      + arn                    = (known after apply)
+      + description            = (known after apply)
+      + egress                 = (known after apply)
+      + id                     = (known after apply)
+      + ingress                = (known after apply)
+      + name                   = (known after apply)
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-default-sg-restricted"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all               = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-default-sg-restricted"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + vpc_id                 = (known after apply)
+    }
+
+  # aws_ecr_lifecycle_policy.orders_api will be created
+  + resource "aws_ecr_lifecycle_policy" "orders_api" {
+      + id          = (known after apply)
+      + policy      = jsonencode(
+            {
+              + rules = [
+                  + {
+                      + action       = {
+                          + type = "expire"
+                        }
+                      + description  = "Keep last 20 images"
+                      + rulePriority = 1
+                      + selection    = {
+                          + countNumber = 20
+                          + countType   = "imageCountMoreThan"
+                          + tagStatus   = "any"
+                        }
+                    },
+                ]
+            }
+        )
+      + registry_id = (known after apply)
+      + repository  = "epd-eks-dev-orders-api"
+    }
+
+  # aws_ecr_repository.orders_api will be created
+  + resource "aws_ecr_repository" "orders_api" {
+      + arn                  = (known after apply)
+      + id                   = (known after apply)
+      + image_tag_mutability = "IMMUTABLE"
+      + name                 = "epd-eks-dev-orders-api"
+      + registry_id          = (known after apply)
+      + repository_url       = (known after apply)
+      + tags                 = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-orders-api"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all             = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-orders-api"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+
+      + encryption_configuration {
+          + encryption_type = "KMS"
+          + kms_key         = (known after apply)
+        }
+
+      + image_scanning_configuration {
+          + scan_on_push = true
+        }
+    }
+
+  # aws_eip.nat will be created
+  + resource "aws_eip" "nat" {
+      + allocation_id        = (known after apply)
+      + arn                  = (known after apply)
+      + association_id       = (known after apply)
+      + carrier_ip           = (known after apply)
+      + customer_owned_ip    = (known after apply)
+      + domain               = "vpc"
+      + id                   = (known after apply)
+      + instance             = (known after apply)
+      + ipam_pool_id         = (known after apply)
+      + network_border_group = (known after apply)
+      + network_interface    = (known after apply)
+      + private_dns          = (known after apply)
+      + private_ip           = (known after apply)
+      + ptr_record           = (known after apply)
+      + public_dns           = (known after apply)
+      + public_ip            = (known after apply)
+      + public_ipv4_pool     = (known after apply)
+      + tags                 = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-nat-eip"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all             = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-nat-eip"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + vpc                  = (known after apply)
+    }
+
+  # aws_eks_cluster.main will be created
+  + resource "aws_eks_cluster" "main" {
+      + arn                           = (known after apply)
+      + bootstrap_self_managed_addons = true
+      + certificate_authority         = (known after apply)
+      + cluster_id                    = (known after apply)
+      + created_at                    = (known after apply)
+      + enabled_cluster_log_types     = [
+          + "api",
+          + "audit",
+          + "authenticator",
+          + "controllerManager",
+          + "scheduler",
+        ]
+      + endpoint                      = (known after apply)
+      + id                            = (known after apply)
+      + identity                      = (known after apply)
+      + name                          = "epd-eks-dev"
+      + platform_version              = (known after apply)
+      + role_arn                      = (known after apply)
+      + status                        = (known after apply)
+      + tags                          = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all                      = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + version                       = "1.31"
+
+      + access_config {
+          + authentication_mode                         = "API_AND_CONFIG_MAP"
+          + bootstrap_cluster_creator_admin_permissions = true
+        }
+
+      + encryption_config {
+          + resources = [
+              + "secrets",
+            ]
+
+          + provider {
+              + key_arn = (known after apply)
+            }
+        }
+
+      + kubernetes_network_config (known after apply)
+
+      + upgrade_policy (known after apply)
+
+      + vpc_config {
+          + cluster_security_group_id = (known after apply)
+          + endpoint_private_access   = true
+          + endpoint_public_access    = true
+          + public_access_cidrs       = [
+              + "213.78.142.56/32",
+            ]
+          + subnet_ids                = (known after apply)
+          + vpc_id                    = (known after apply)
+        }
+    }
+
+  # aws_eks_node_group.main will be created
+  + resource "aws_eks_node_group" "main" {
+      + ami_type               = (known after apply)
+      + arn                    = (known after apply)
+      + capacity_type          = "ON_DEMAND"
+      + cluster_name           = "epd-eks-dev"
+      + disk_size              = (known after apply)
+      + id                     = (known after apply)
+      + instance_types         = [
+          + "t3.medium",
+        ]
+      + labels                 = {
+          + "environment" = "dev"
+          + "workload"    = "platform"
+        }
+      + node_group_name        = "epd-eks-dev-nodes"
+      + node_group_name_prefix = (known after apply)
+      + node_role_arn          = (known after apply)
+      + release_version        = (known after apply)
+      + resources              = (known after apply)
+      + status                 = (known after apply)
+      + subnet_ids             = (known after apply)
+      + tags                   = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-nodes"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all               = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-nodes"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + version                = (known after apply)
+
+      + node_repair_config (known after apply)
+
+      + scaling_config {
+          + desired_size = 2
+          + max_size     = 3
+          + min_size     = 1
+        }
+
+      + update_config {
+          + max_unavailable = 1
+        }
+    }
+
+  # aws_flow_log.main will be created
+  + resource "aws_flow_log" "main" {
+      + arn                      = (known after apply)
+      + iam_role_arn             = (known after apply)
+      + id                       = (known after apply)
+      + log_destination          = (known after apply)
+      + log_destination_type     = "cloud-watch-logs"
+      + log_format               = (known after apply)
+      + log_group_name           = (known after apply)
+      + max_aggregation_interval = 600
+      + tags                     = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-vpc-flow-log"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all                 = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-vpc-flow-log"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + traffic_type             = "ALL"
+      + vpc_id                   = (known after apply)
+    }
+
+  # aws_iam_openid_connect_provider.github will be created
+  + resource "aws_iam_openid_connect_provider" "github" {
+      + arn             = (known after apply)
+      + client_id_list  = [
+          + "sts.amazonaws.com",
+        ]
+      + id              = (known after apply)
+      + tags            = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all        = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + thumbprint_list = [
+          + "6938fd4d98bab03faadb97b34396831e3780aea1",
+        ]
+      + url             = "https://token.actions.githubusercontent.com"
+    }
+
+  # aws_iam_policy.github_actions_deploy will be created
+  + resource "aws_iam_policy" "github_actions_deploy" {
+      + arn              = (known after apply)
+      + attachment_count = (known after apply)
+      + description      = "Least-privilege deployment policy for GitHub Actions."
+      + id               = (known after apply)
+      + name             = "epd-eks-dev-github-actions-deploy-policy"
+      + name_prefix      = (known after apply)
+      + path             = "/"
+      + policy           = (known after apply)
+      + policy_id        = (known after apply)
+      + tags_all         = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+    }
+
+  # aws_iam_policy.vpc_flow_logs will be created
+  + resource "aws_iam_policy" "vpc_flow_logs" {
+      + arn              = (known after apply)
+      + attachment_count = (known after apply)
+      + description      = "Allow VPC Flow Logs to publish to CloudWatch Logs."
+      + id               = (known after apply)
+      + name             = "epd-eks-dev-vpc-flow-logs-policy"
+      + name_prefix      = (known after apply)
+      + path             = "/"
+      + policy           = (known after apply)
+      + policy_id        = (known after apply)
+      + tags_all         = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+    }
+
+  # aws_iam_role.eks_cluster will be created
+  + resource "aws_iam_role" "eks_cluster" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "eks.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "epd-eks-dev-eks-cluster-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags                  = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all              = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role.eks_node_group will be created
+  + resource "aws_iam_role" "eks_node_group" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "ec2.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "epd-eks-dev-eks-node-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags                  = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all              = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role.github_actions_deploy will be created
+  + resource "aws_iam_role" "github_actions_deploy" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = (known after apply)
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "epd-eks-dev-github-actions-deploy"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags                  = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all              = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role.vpc_flow_logs will be created
+  + resource "aws_iam_role" "vpc_flow_logs" {
+      + arn                   = (known after apply)
+      + assume_role_policy    = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "sts:AssumeRole"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "vpc-flow-logs.amazonaws.com"
+                        }
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + create_date           = (known after apply)
+      + force_detach_policies = false
+      + id                    = (known after apply)
+      + managed_policy_arns   = (known after apply)
+      + max_session_duration  = 3600
+      + name                  = "epd-eks-dev-vpc-flow-logs-role"
+      + name_prefix           = (known after apply)
+      + path                  = "/"
+      + tags                  = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all              = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + unique_id             = (known after apply)
+
+      + inline_policy (known after apply)
+    }
+
+  # aws_iam_role_policy_attachment.eks_cluster_policy will be created
+  + resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+      + role       = "epd-eks-dev-eks-cluster-role"
+    }
+
+  # aws_iam_role_policy_attachment.eks_cni_policy will be created
+  + resource "aws_iam_role_policy_attachment" "eks_cni_policy" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+      + role       = "epd-eks-dev-eks-node-role"
+    }
+
+  # aws_iam_role_policy_attachment.eks_ecr_readonly will be created
+  + resource "aws_iam_role_policy_attachment" "eks_ecr_readonly" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      + role       = "epd-eks-dev-eks-node-role"
+    }
+
+  # aws_iam_role_policy_attachment.eks_worker_node_policy will be created
+  + resource "aws_iam_role_policy_attachment" "eks_worker_node_policy" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+      + role       = "epd-eks-dev-eks-node-role"
+    }
+
+  # aws_iam_role_policy_attachment.github_actions_deploy will be created
+  + resource "aws_iam_role_policy_attachment" "github_actions_deploy" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "epd-eks-dev-github-actions-deploy"
+    }
+
+  # aws_iam_role_policy_attachment.vpc_flow_logs will be created
+  + resource "aws_iam_role_policy_attachment" "vpc_flow_logs" {
+      + id         = (known after apply)
+      + policy_arn = (known after apply)
+      + role       = "epd-eks-dev-vpc-flow-logs-role"
+    }
+
+  # aws_internet_gateway.main will be created
+  + resource "aws_internet_gateway" "main" {
+      + arn      = (known after apply)
+      + id       = (known after apply)
+      + owner_id = (known after apply)
+      + tags     = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-igw"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-igw"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + vpc_id   = (known after apply)
+    }
+
+  # aws_kms_alias.cloudwatch_logs will be created
+  + resource "aws_kms_alias" "cloudwatch_logs" {
+      + arn            = (known after apply)
+      + id             = (known after apply)
+      + name           = "alias/epd-eks-dev-cloudwatch-logs"
+      + name_prefix    = (known after apply)
+      + target_key_arn = (known after apply)
+      + target_key_id  = (known after apply)
+    }
+
+  # aws_kms_alias.ecr will be created
+  + resource "aws_kms_alias" "ecr" {
+      + arn            = (known after apply)
+      + id             = (known after apply)
+      + name           = "alias/epd-eks-dev-ecr"
+      + name_prefix    = (known after apply)
+      + target_key_arn = (known after apply)
+      + target_key_id  = (known after apply)
+    }
+
+  # aws_kms_alias.eks_secrets will be created
+  + resource "aws_kms_alias" "eks_secrets" {
+      + arn            = (known after apply)
+      + id             = (known after apply)
+      + name           = "alias/epd-eks-dev-eks-secrets"
+      + name_prefix    = (known after apply)
+      + target_key_arn = (known after apply)
+      + target_key_id  = (known after apply)
+    }
+
+  # aws_kms_key.cloudwatch_logs will be created
+  + resource "aws_kms_key" "cloudwatch_logs" {
+      + arn                                = (known after apply)
+      + bypass_policy_lockout_safety_check = false
+      + customer_master_key_spec           = "SYMMETRIC_DEFAULT"
+      + deletion_window_in_days            = 7
+      + description                        = "KMS key for CloudWatch log group encryption"
+      + enable_key_rotation                = true
+      + id                                 = (known after apply)
+      + is_enabled                         = true
+      + key_id                             = (known after apply)
+      + key_usage                          = "ENCRYPT_DECRYPT"
+      + multi_region                       = (known after apply)
+      + policy                             = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "kms:*"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::677276115158:root"
+                        }
+                      + Resource  = "*"
+                      + Sid       = "EnableAccountAdministration"
+                    },
+                  + {
+                      + Action    = [
+                          + "kms:Encrypt",
+                          + "kms:Decrypt",
+                          + "kms:ReEncrypt*",
+                          + "kms:GenerateDataKey*",
+                          + "kms:DescribeKey",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "logs.us-east-1.amazonaws.com"
+                        }
+                      + Resource  = "*"
+                      + Sid       = "AllowCloudWatchLogsUse"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + rotation_period_in_days            = (known after apply)
+      + tags                               = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-cloudwatch-logs-kms"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all                           = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-cloudwatch-logs-kms"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+    }
+
+  # aws_kms_key.ecr will be created
+  + resource "aws_kms_key" "ecr" {
+      + arn                                = (known after apply)
+      + bypass_policy_lockout_safety_check = false
+      + customer_master_key_spec           = "SYMMETRIC_DEFAULT"
+      + deletion_window_in_days            = 7
+      + description                        = "KMS key for ECR repository encryption"
+      + enable_key_rotation                = true
+      + id                                 = (known after apply)
+      + is_enabled                         = true
+      + key_id                             = (known after apply)
+      + key_usage                          = "ENCRYPT_DECRYPT"
+      + multi_region                       = (known after apply)
+      + policy                             = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "kms:*"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::677276115158:root"
+                        }
+                      + Resource  = "*"
+                      + Sid       = "EnableAccountAdministration"
+                    },
+                  + {
+                      + Action    = [
+                          + "kms:Encrypt",
+                          + "kms:Decrypt",
+                          + "kms:ReEncrypt*",
+                          + "kms:GenerateDataKey*",
+                          + "kms:DescribeKey",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "ecr.us-east-1.amazonaws.com"
+                        }
+                      + Resource  = "*"
+                      + Sid       = "AllowECRUse"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + rotation_period_in_days            = (known after apply)
+      + tags                               = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-ecr-kms"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all                           = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-ecr-kms"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+    }
+
+  # aws_kms_key.eks_secrets will be created
+  + resource "aws_kms_key" "eks_secrets" {
+      + arn                                = (known after apply)
+      + bypass_policy_lockout_safety_check = false
+      + customer_master_key_spec           = "SYMMETRIC_DEFAULT"
+      + deletion_window_in_days            = 7
+      + description                        = "KMS key for EKS Kubernetes secrets encryption"
+      + enable_key_rotation                = true
+      + id                                 = (known after apply)
+      + is_enabled                         = true
+      + key_id                             = (known after apply)
+      + key_usage                          = "ENCRYPT_DECRYPT"
+      + multi_region                       = (known after apply)
+      + policy                             = jsonencode(
+            {
+              + Statement = [
+                  + {
+                      + Action    = "kms:*"
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + AWS = "arn:aws:iam::677276115158:root"
+                        }
+                      + Resource  = "*"
+                      + Sid       = "EnableAccountAdministration"
+                    },
+                  + {
+                      + Action    = [
+                          + "kms:Encrypt",
+                          + "kms:Decrypt",
+                          + "kms:ReEncrypt*",
+                          + "kms:GenerateDataKey*",
+                          + "kms:DescribeKey",
+                          + "kms:CreateGrant",
+                        ]
+                      + Effect    = "Allow"
+                      + Principal = {
+                          + Service = "eks.us-east-1.amazonaws.com"
+                        }
+                      + Resource  = "*"
+                      + Sid       = "AllowEKSUse"
+                    },
+                ]
+              + Version   = "2012-10-17"
+            }
+        )
+      + rotation_period_in_days            = (known after apply)
+      + tags                               = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-eks-secrets-kms"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all                           = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-eks-secrets-kms"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+    }
+
+  # aws_nat_gateway.main will be created
+  + resource "aws_nat_gateway" "main" {
+      + allocation_id                      = (known after apply)
+      + association_id                     = (known after apply)
+      + connectivity_type                  = "public"
+      + id                                 = (known after apply)
+      + network_interface_id               = (known after apply)
+      + private_ip                         = (known after apply)
+      + public_ip                          = (known after apply)
+      + secondary_private_ip_address_count = (known after apply)
+      + secondary_private_ip_addresses     = (known after apply)
+      + subnet_id                          = (known after apply)
+      + tags                               = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-nat"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all                           = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-nat"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+    }
+
+  # aws_route.private_nat will be created
+  + resource "aws_route" "private_nat" {
+      + destination_cidr_block = "0.0.0.0/0"
+      + id                     = (known after apply)
+      + instance_id            = (known after apply)
+      + instance_owner_id      = (known after apply)
+      + nat_gateway_id         = (known after apply)
+      + network_interface_id   = (known after apply)
+      + origin                 = (known after apply)
+      + route_table_id         = (known after apply)
+      + state                  = (known after apply)
+    }
+
+  # aws_route.public_internet will be created
+  + resource "aws_route" "public_internet" {
+      + destination_cidr_block = "0.0.0.0/0"
+      + gateway_id             = (known after apply)
+      + id                     = (known after apply)
+      + instance_id            = (known after apply)
+      + instance_owner_id      = (known after apply)
+      + network_interface_id   = (known after apply)
+      + origin                 = (known after apply)
+      + route_table_id         = (known after apply)
+      + state                  = (known after apply)
+    }
+
+  # aws_route_table.private will be created
+  + resource "aws_route_table" "private" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = (known after apply)
+      + tags             = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-private-rt"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all         = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-private-rt"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table.public will be created
+  + resource "aws_route_table" "public" {
+      + arn              = (known after apply)
+      + id               = (known after apply)
+      + owner_id         = (known after apply)
+      + propagating_vgws = (known after apply)
+      + route            = (known after apply)
+      + tags             = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-public-rt"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all         = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-public-rt"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + vpc_id           = (known after apply)
+    }
+
+  # aws_route_table_association.private[0] will be created
+  + resource "aws_route_table_association" "private" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.private[1] will be created
+  + resource "aws_route_table_association" "private" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.public[0] will be created
+  + resource "aws_route_table_association" "public" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_route_table_association.public[1] will be created
+  + resource "aws_route_table_association" "public" {
+      + id             = (known after apply)
+      + route_table_id = (known after apply)
+      + subnet_id      = (known after apply)
+    }
+
+  # aws_subnet.private[0] will be created
+  + resource "aws_subnet" "private" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.40.10.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Environment"                       = "dev"
+          + "ManagedBy"                         = "Terraform"
+          + "Name"                              = "epd-eks-dev-private-1"
+          + "Owner"                             = "gbadedata"
+          + "Project"                           = "epd-eks"
+          + "kubernetes.io/cluster/epd-eks-dev" = "shared"
+          + "kubernetes.io/role/internal-elb"   = "1"
+        }
+      + tags_all                                       = {
+          + "Environment"                       = "dev"
+          + "ManagedBy"                         = "Terraform"
+          + "Name"                              = "epd-eks-dev-private-1"
+          + "Owner"                             = "gbadedata"
+          + "Project"                           = "epd-eks"
+          + "kubernetes.io/cluster/epd-eks-dev" = "shared"
+          + "kubernetes.io/role/internal-elb"   = "1"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.private[1] will be created
+  + resource "aws_subnet" "private" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1b"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.40.11.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Environment"                       = "dev"
+          + "ManagedBy"                         = "Terraform"
+          + "Name"                              = "epd-eks-dev-private-2"
+          + "Owner"                             = "gbadedata"
+          + "Project"                           = "epd-eks"
+          + "kubernetes.io/cluster/epd-eks-dev" = "shared"
+          + "kubernetes.io/role/internal-elb"   = "1"
+        }
+      + tags_all                                       = {
+          + "Environment"                       = "dev"
+          + "ManagedBy"                         = "Terraform"
+          + "Name"                              = "epd-eks-dev-private-2"
+          + "Owner"                             = "gbadedata"
+          + "Project"                           = "epd-eks"
+          + "kubernetes.io/cluster/epd-eks-dev" = "shared"
+          + "kubernetes.io/role/internal-elb"   = "1"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.public[0] will be created
+  + resource "aws_subnet" "public" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.40.0.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Environment"                       = "dev"
+          + "ManagedBy"                         = "Terraform"
+          + "Name"                              = "epd-eks-dev-public-1"
+          + "Owner"                             = "gbadedata"
+          + "Project"                           = "epd-eks"
+          + "kubernetes.io/cluster/epd-eks-dev" = "shared"
+          + "kubernetes.io/role/elb"            = "1"
+        }
+      + tags_all                                       = {
+          + "Environment"                       = "dev"
+          + "ManagedBy"                         = "Terraform"
+          + "Name"                              = "epd-eks-dev-public-1"
+          + "Owner"                             = "gbadedata"
+          + "Project"                           = "epd-eks"
+          + "kubernetes.io/cluster/epd-eks-dev" = "shared"
+          + "kubernetes.io/role/elb"            = "1"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_subnet.public[1] will be created
+  + resource "aws_subnet" "public" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "us-east-1b"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.40.1.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Environment"                       = "dev"
+          + "ManagedBy"                         = "Terraform"
+          + "Name"                              = "epd-eks-dev-public-2"
+          + "Owner"                             = "gbadedata"
+          + "Project"                           = "epd-eks"
+          + "kubernetes.io/cluster/epd-eks-dev" = "shared"
+          + "kubernetes.io/role/elb"            = "1"
+        }
+      + tags_all                                       = {
+          + "Environment"                       = "dev"
+          + "ManagedBy"                         = "Terraform"
+          + "Name"                              = "epd-eks-dev-public-2"
+          + "Owner"                             = "gbadedata"
+          + "Project"                           = "epd-eks"
+          + "kubernetes.io/cluster/epd-eks-dev" = "shared"
+          + "kubernetes.io/role/elb"            = "1"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+
+  # aws_vpc.main will be created
+  + resource "aws_vpc" "main" {
+      + arn                                  = (known after apply)
+      + cidr_block                           = "10.40.0.0/16"
+      + default_network_acl_id               = (known after apply)
+      + default_route_table_id               = (known after apply)
+      + default_security_group_id            = (known after apply)
+      + dhcp_options_id                      = (known after apply)
+      + enable_dns_hostnames                 = true
+      + enable_dns_support                   = true
+      + enable_network_address_usage_metrics = (known after apply)
+      + id                                   = (known after apply)
+      + instance_tenancy                     = "default"
+      + ipv6_association_id                  = (known after apply)
+      + ipv6_cidr_block                      = (known after apply)
+      + ipv6_cidr_block_network_border_group = (known after apply)
+      + main_route_table_id                  = (known after apply)
+      + owner_id                             = (known after apply)
+      + tags                                 = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-vpc"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+      + tags_all                             = {
+          + "Environment" = "dev"
+          + "ManagedBy"   = "Terraform"
+          + "Name"        = "epd-eks-dev-vpc"
+          + "Owner"       = "gbadedata"
+          + "Project"     = "epd-eks"
+        }
+    }
+
+Plan: 42 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + aws_region              = "us-east-1"
+  + cluster_endpoint        = (known after apply)
+  + cluster_name            = "epd-eks-dev"
+  + ecr_repository_url      = (known after apply)
+  + github_actions_role_arn = (known after apply)
+  + private_subnet_ids      = [
+      + (known after apply),
+      + (known after apply),
+    ]
+  + public_subnet_ids       = [
+      + (known after apply),
+      + (known after apply),
+    ]
+  + vpc_id                  = (known after apply)
