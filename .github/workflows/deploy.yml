@@ -1,0 +1,104 @@
+name: Deploy to EKS with OIDC
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Image tag to build and deploy"
+        required: true
+        default: "v4.0.0"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: Build, Scan, Push, and Deploy
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: us-east-1
+      CLUSTER_NAME: epd-eks-dev
+      APP_NAMESPACE: app-dev
+      APP_NAME: orders-api
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::677276115158:role/epd-eks-dev-github-actions-deploy
+          aws-region: us-east-1
+
+      - name: Confirm AWS identity
+        run: aws sts get-caller-identity
+
+      - name: Get ECR repository URL
+        id: ecr
+        run: |
+          ECR_REPO_URL="$(aws ecr describe-repositories \
+            --repository-names epd-eks-dev-orders-api \
+            --region "$AWS_REGION" \
+            --query 'repositories[0].repositoryUri' \
+            --output text)"
+          echo "repo_url=$ECR_REPO_URL" >> "$GITHUB_OUTPUT"
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        run: |
+          docker build --no-cache \
+            -t orders-api:${{ github.event.inputs.image_tag }} \
+            ./app
+
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: orders-api:${{ github.event.inputs.image_tag }}
+          scan-type: image
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          format: table
+
+      - name: Tag and push image to ECR
+        run: |
+          docker tag orders-api:${{ github.event.inputs.image_tag }} \
+            ${{ steps.ecr.outputs.repo_url }}:${{ github.event.inputs.image_tag }}
+
+          docker push \
+            ${{ steps.ecr.outputs.repo_url }}:${{ github.event.inputs.image_tag }}
+
+      - name: Configure kubectl
+        run: |
+          aws eks update-kubeconfig \
+            --region "$AWS_REGION" \
+            --name "$CLUSTER_NAME"
+
+      - name: Install Argo Rollouts kubectl plugin
+        run: |
+          curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+          chmod +x kubectl-argo-rollouts-linux-amd64
+          sudo mv kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
+
+      - name: Deploy image through Argo Rollouts
+        run: |
+          kubectl argo rollouts set image "$APP_NAME" \
+            "$APP_NAME=${{ steps.ecr.outputs.repo_url }}:${{ github.event.inputs.image_tag }}" \
+            -n "$APP_NAMESPACE"
+
+      - name: Wait for rollout
+        run: |
+          kubectl argo rollouts status "$APP_NAME" \
+            -n "$APP_NAMESPACE" \
+            --timeout 600
+
+      - name: Show rollout summary
+        if: always()
+        run: |
+          kubectl argo rollouts get rollout "$APP_NAME" -n "$APP_NAMESPACE"
+          kubectl get pods -n "$APP_NAMESPACE" -o wide
