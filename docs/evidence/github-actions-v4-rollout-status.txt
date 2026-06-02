@@ -1,0 +1,33 @@
+Name:            orders-api
+Namespace:       app-dev
+Status:          [32m✔[0m Healthy
+Strategy:        Canary
+  Step:          8/8
+  SetWeight:     100
+  ActualWeight:  100
+Images:          677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v4.0.2 ([32mstable[0m)
+Replicas:
+  Desired:       4
+  Current:       4
+  Updated:       4
+  Ready:         4
+  Available:     4
+
+NAME                                    KIND         STATUS        AGE    INFO
+⟳ orders-api                            Rollout      [32m✔[0m Healthy     43m    
+├──# revision:8                                                           
+│  ├──⧉ [32morders-api-58d9b675d6[0m           ReplicaSet   [32m✔[0m Healthy     7m8s   [32mstable[0m
+│  │  ├──□ orders-api-58d9b675d6-7g7z7  Pod          [32m✔[0m Running     7m7s   ready:1/1
+│  │  ├──□ orders-api-58d9b675d6-pmthj  Pod          [32m✔[0m Running     5m27s  ready:1/1
+│  │  ├──□ orders-api-58d9b675d6-2bjhz  Pod          [32m✔[0m Running     3m47s  ready:1/1
+│  │  └──□ orders-api-58d9b675d6-dbkv2  Pod          [32m✔[0m Running     3m47s  ready:1/1
+│  ├──α [0morders-api-58d9b675d6-8-2[0m       AnalysisRun  [32m✔[0m Successful  5m57s  [32m✔[0m 2
+│  └──α [0morders-api-58d9b675d6-8-5[0m       AnalysisRun  [32m✔[0m Successful  4m17s  [32m✔[0m 2
+├──# revision:7                                                           
+│  └──⧉ orders-api-7b855b6d6d           ReplicaSet   [0m•[0m ScaledDown  7m9s   
+├──# revision:6                                                           
+│  ├──⧉ orders-api-7b7d56b985           ReplicaSet   [0m•[0m ScaledDown  15m    
+│  ├──α [0morders-api-7b7d56b985-6-2[0m       AnalysisRun  [32m✔[0m Successful  10m    [32m✔[0m 2
+│  └──α [0morders-api-7b7d56b985-6-5[0m       AnalysisRun  [32m✔[0m Successful  8m20s  [32m✔[0m 2
+└──# revision:5                                                           
+   └──⧉ orders-api-6fd7fc9554           ReplicaSet   [0m•[0m ScaledDown  15m    delay:passed

@@ -1,0 +1,206 @@
+Name:         orders-api
+Namespace:    app-dev
+Labels:       app=orders-api
+Annotations:  rollout.argoproj.io/revision: 8
+API Version:  argoproj.io/v1alpha1
+Kind:         Rollout
+Metadata:
+  Creation Timestamp:  2026-06-02T08:40:35Z
+  Generation:          8
+  Resource Version:    15554
+  UID:                 bebafad7-6758-4d36-ad4c-32ac5f110666
+Spec:
+  Replicas:                4
+  Revision History Limit:  3
+  Selector:
+    Match Labels:
+      App:  orders-api
+  Strategy:
+    Canary:
+      Canary Service:  orders-api-canary
+      Stable Service:  orders-api-stable
+      Steps:
+        Set Weight:  10
+        Pause:
+          Duration:  60s
+        Analysis:
+          Templates:
+            Template Name:  orders-api-success-rate
+        Set Weight:         50
+        Pause:
+          Duration:  60s
+        Analysis:
+          Templates:
+            Template Name:  orders-api-success-rate
+        Set Weight:         100
+        Pause:
+          Duration:  30s
+      Traffic Routing:
+        Nginx:
+          Stable Ingress:  orders-api
+  Template:
+    Metadata:
+      Labels:
+        App:      orders-api
+        Version:  v1
+    Spec:
+      Automount Service Account Token:  false
+      Containers:
+        Env:
+          Name:             APP_VERSION
+          Value:            v4.0.2
+          Name:             DEPLOYMENT_COLOR
+          Value:            blue
+          Name:             FAIL_MODE
+          Value:            none
+          Name:             PORT
+          Value:            3000
+        Image:              677276115158.dkr.ecr.us-east-1.amazonaws.com/epd-eks-dev-orders-api:v4.0.2
+        Image Pull Policy:  Always
+        Liveness Probe:
+          Failure Threshold:  3
+          Http Get:
+            Path:                 /live
+            Port:                 3000
+            Scheme:               HTTP
+          Initial Delay Seconds:  10
+          Period Seconds:         20
+          Success Threshold:      1
+          Timeout Seconds:        3
+        Name:                     orders-api
+        Ports:
+          Container Port:  3000
+          Name:            http
+          Protocol:        TCP
+        Readiness Probe:
+          Failure Threshold:  3
+          Http Get:
+            Path:                 /ready
+            Port:                 3000
+            Scheme:               HTTP
+          Initial Delay Seconds:  5
+          Period Seconds:         10
+          Success Threshold:      1
+          Timeout Seconds:        3
+        Resources:
+          Limits:
+            Cpu:     500m
+            Memory:  256Mi
+          Requests:
+            Cpu:     100m
+            Memory:  128Mi
+        Security Context:
+          Allow Privilege Escalation:  false
+          Capabilities:
+            Drop:
+              ALL
+          Read Only Root Filesystem:  false
+        Termination Message Path:     /dev/termination-log
+        Termination Message Policy:   File
+      Dns Policy:                     ClusterFirst
+      Restart Policy:                 Always
+      Scheduler Name:                 default-scheduler
+      Security Context:
+        Fs Group:         101
+        Run As Group:     101
+        Run As Non Root:  true
+        Run As User:      100
+        Seccomp Profile:
+          Type:                          RuntimeDefault
+      Service Account:                   orders-api
+      Service Account Name:              orders-api
+      Termination Grace Period Seconds:  30
+Status:
+  HPA Replicas:        4
+  Available Replicas:  4
+  Blue Green:
+  Canary:
+    Weights:
+      Canary:
+        Pod Template Hash:  58d9b675d6
+        Service Name:       orders-api-canary
+        Weight:             0
+      Stable:
+        Pod Template Hash:  58d9b675d6
+        Service Name:       orders-api-stable
+        Weight:             100
+  Conditions:
+    Last Transition Time:  2026-06-02T08:40:45Z
+    Last Update Time:      2026-06-02T08:40:45Z
+    Message:               Rollout has minimum availability
+    Reason:                AvailableReason
+    Status:                True
+    Type:                  Available
+    Last Transition Time:  2026-06-02T09:21:04Z
+    Last Update Time:      2026-06-02T09:21:04Z
+    Message:               RolloutCompleted
+    Reason:                RolloutCompleted
+    Status:                True
+    Type:                  Completed
+    Last Transition Time:  2026-06-02T09:21:04Z
+    Last Update Time:      2026-06-02T09:21:04Z
+    Message:               Rollout is paused
+    Reason:                RolloutPaused
+    Status:                False
+    Type:                  Paused
+    Last Transition Time:  2026-06-02T09:21:34Z
+    Last Update Time:      2026-06-02T09:21:34Z
+    Message:               Rollout is healthy
+    Reason:                RolloutHealthy
+    Status:                True
+    Type:                  Healthy
+    Last Transition Time:  2026-06-02T09:21:04Z
+    Last Update Time:      2026-06-02T09:21:34Z
+    Message:               ReplicaSet "orders-api-58d9b675d6" has successfully progressed.
+    Reason:                NewReplicaSetAvailable
+    Status:                True
+    Type:                  Progressing
+  Current Pod Hash:        58d9b675d6
+  Current Step Hash:       59b4cc8d9d
+  Current Step Index:      8
+  Observed Generation:     8
+  Phase:                   Healthy
+  Ready Replicas:          4
+  Replicas:                4
+  Selector:                app=orders-api
+  Stable RS:               58d9b675d6
+  Updated Replicas:        4
+Events:
+  Type     Reason                  Age                   From                 Message
+  ----     ------                  ----                  ----                 -------
+  Normal   RolloutAddedToInformer  43m                   rollouts-controller  Rollout resource added to informer: app-dev/orders-api
+  Normal   RolloutUpdated          43m                   rollouts-controller  Rollout updated to revision 1
+  Normal   NewReplicaSetCreated    43m                   rollouts-controller  Created ReplicaSet orders-api-7f575c7f78 (revision 1)
+  Normal   RolloutNotCompleted     43m                   rollouts-controller  Rollout not completed, started update to revision 1 (7f575c7f78)
+  Normal   ScalingReplicaSet       43m                   rollouts-controller  Scaled up ReplicaSet orders-api-7f575c7f78 (revision 1) from 0 to 4
+  Normal   RolloutCompleted        43m                   rollouts-controller  Rollout completed update to revision 1 (7f575c7f78): Initial deploy
+  Normal   SwitchService           43m                   rollouts-controller  Switched selector for service 'orders-api-stable' from '' to '7f575c7f78'
+  Normal   SwitchService           43m                   rollouts-controller  Switched selector for service 'orders-api-canary' from '' to '7f575c7f78'
+  Normal   CreatingCanaryIngress   43m                   rollouts-controller  Creating canary ingress `orders-api-orders-api-canary` with weight `0`
+  Normal   TrafficWeightUpdated    43m                   rollouts-controller  Traffic weight updated to 0
+  Normal   RolloutUpdated          22m                   rollouts-controller  Rollout updated to revision 2
+  Normal   NewReplicaSetCreated    22m                   rollouts-controller  Created ReplicaSet orders-api-699998c46d (revision 2)
+  Normal   RolloutNotCompleted     22m                   rollouts-controller  Rollout not completed, started update to revision 2 (699998c46d)
+  Normal   ScalingReplicaSet       22m                   rollouts-controller  Scaled up ReplicaSet orders-api-699998c46d (revision 2) from 0 to 1
+  Normal   ScalingReplicaSet       22m                   rollouts-controller  Scaled down ReplicaSet orders-api-699998c46d (revision 2) from 1 to 0
+  Normal   RolloutUpdated          22m                   rollouts-controller  Rollout updated to revision 3
+  Normal   NewReplicaSetCreated    22m                   rollouts-controller  Created ReplicaSet orders-api-84774c7758 (revision 3)
+  Normal   ScalingReplicaSet       22m                   rollouts-controller  Scaled up ReplicaSet orders-api-84774c7758 (revision 3) from 0 to 1
+  Normal   TrafficWeightUpdated    22m (x2 over 22m)     rollouts-controller  Traffic weight updated
+  Normal   SwitchService           22m                   rollouts-controller  Switched selector for service 'orders-api-canary' from '7f575c7f78' to '84774c7758'
+  Normal   PatchingCanaryIngress   22m                   rollouts-controller  Updating Ingress `orders-api-orders-api-canary` to desiredWeight '10'
+  Normal   TrafficWeightUpdated    22m                   rollouts-controller  Traffic weight updated from 0 to 10
+  Normal   RolloutStepCompleted    22m                   rollouts-controller  Rollout step 1/8 completed (setWeight: 10)
+  Normal   RolloutPaused           22m                   rollouts-controller  Rollout is paused (CanaryPauseStep)
+  Normal   RolloutResumed          21m                   rollouts-controller  Rollout is resumed
+  Normal   RolloutStepCompleted    21m                   rollouts-controller  Rollout step 2/8 completed (pause: 60s)
+  Normal   AnalysisRunRunning      21m                   rollouts-controller  Step Analysis Run 'orders-api-84774c7758-3-2' Status New: 'Running' Previous: ''
+  Warning  AnalysisRunError        21m                   rollouts-controller  Step Analysis Run 'orders-api-84774c7758-3-2' Status New: 'Error' Previous: 'Running'
+  Warning  RolloutAborted          21m                   rollouts-controller  Rollout aborted update to revision 3: Step-based analysis phase error/failed: Metric "success-rate" assessed Error due to consecutiveErrors (5) > consecutiveErrorLimit (4): "Error Message: reflect: slice index out of range"
+  Normal   SwitchService           21m                   rollouts-controller  Switched selector for service 'orders-api-canary' from '84774c7758' to '7f575c7f78'
+  Normal   RolloutUpdated          16m                   rollouts-controller  Rollout updated to revision 4
+  Warning  AnalysisRunError        14m                   rollouts-controller  Step Analysis Run 'orders-api-6fd7fc9554-5-2' Status New: 'Error' Previous: 'Running'
+  Warning  RolloutAborted          14m                   rollouts-controller  Rollout aborted update to revision 5: Step-based analysis phase error/failed: Metric "success-rate" assessed Error due to consecutiveErrors (5) > consecutiveErrorLimit (4): "Error Message: reflect: slice index out of range"
+  Normal   RolloutUpdated          11m                   rollouts-controller  Rollout updated to revision 6
+  Normal   RolloutStepCompleted    8m22s                 rollouts-controller  Rollout step 5/8 completed (pause: 60s)
+  Normal   RolloutStepCompleted    3m9s (x2 over 7m12s)  rollouts-controller  Rollout step 8/8 completed (pause: 30s)
