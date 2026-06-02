@@ -1,5 +1,6 @@
 # -----------------------------
 # GitHub Actions Self-Hosted Runner EC2
+# Private runner with SSM access
 # -----------------------------
 
 data "aws_ami" "ubuntu_2404" {
@@ -19,19 +20,11 @@ data "aws_ami" "ubuntu_2404" {
 
 resource "aws_security_group" "github_runner" {
   name        = "${local.name_prefix}-github-runner-sg"
-  description = "Security group for GitHub Actions self-hosted runner"
+  description = "Security group for private GitHub Actions self-hosted runner"
   vpc_id      = aws_vpc.main.id
 
-  ingress {
-    description = "SSH from operator IP only"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = [var.runner_allowed_ssh_cidr]
-  }
-
   egress {
-    description = "Allow outbound internet access for GitHub, AWS APIs, ECR, and package installs"
+    description = "Allow outbound internet access through NAT for GitHub, AWS APIs, ECR, and package installs"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -109,6 +102,11 @@ resource "aws_iam_role_policy_attachment" "github_runner_deploy" {
   policy_arn = aws_iam_policy.github_runner_deploy.arn
 }
 
+resource "aws_iam_role_policy_attachment" "github_runner_ssm" {
+  role       = aws_iam_role.github_runner_ec2.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
 resource "aws_iam_instance_profile" "github_runner" {
   name = "${local.name_prefix}-github-runner-profile"
   role = aws_iam_role.github_runner_ec2.name
@@ -117,11 +115,10 @@ resource "aws_iam_instance_profile" "github_runner" {
 resource "aws_instance" "github_runner" {
   ami                         = data.aws_ami.ubuntu_2404.id
   instance_type               = var.runner_instance_type
-  key_name                    = var.runner_key_name
-  subnet_id                   = aws_subnet.public[0].id
+  subnet_id                   = aws_subnet.private[0].id
   vpc_security_group_ids      = [aws_security_group.github_runner.id]
   iam_instance_profile        = aws_iam_instance_profile.github_runner.name
-  associate_public_ip_address = true
+  associate_public_ip_address = false
 
   root_block_device {
     volume_size           = 30
@@ -140,7 +137,7 @@ resource "aws_instance" "github_runner" {
   })
 }
 
-# Allow the self-hosted runner to reach the EKS private API endpoint.
+# Allow the private self-hosted runner to reach the EKS private API endpoint.
 resource "aws_security_group_rule" "github_runner_to_eks_api" {
   description              = "Allow GitHub self-hosted runner to reach EKS API"
   type                     = "ingress"
