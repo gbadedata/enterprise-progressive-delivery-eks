@@ -14,7 +14,7 @@ permissions:
 jobs:
   deploy:
     name: Build, Scan, Push, and Deploy from AWS Runner
-    runs-on: [self-hosted, linux, x64, epd-eks-runner]
+    runs-on: self-hosted
 
     env:
       AWS_REGION: us-east-1
