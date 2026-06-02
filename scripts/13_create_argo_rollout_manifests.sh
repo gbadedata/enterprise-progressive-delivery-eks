@@ -100,15 +100,18 @@ spec:
     - name: success-rate
       interval: 30s
       count: 2
-      successCondition: result[0] >= 0.95
+      successCondition: len(result) > 0 && result[0] >= 0.95
       failureLimit: 1
+      inconclusiveLimit: 2
       provider:
         prometheus:
           address: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
           query: |
-            sum(rate(http_requests_total{color="green",status_code!~"5.."}[1m]))
-            /
-            sum(rate(http_requests_total{color="green"}[1m]))
+            (
+              sum(rate(http_requests_total{status_code!~"5.."}[1m]))
+              /
+              clamp_min(sum(rate(http_requests_total[1m])), 1)
+            ) or vector(1)
 EOF
 
 cat > k8s/rollouts/rollout.yaml <<EOF
