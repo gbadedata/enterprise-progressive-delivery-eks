@@ -110,7 +110,7 @@ jobs:
         run: |
           kubectl argo rollouts status "$APP_NAME" \
             -n "$APP_NAMESPACE" \
-            --timeout 600
+            --timeout 600s
 
       - name: Show rollout summary
         if: always()
